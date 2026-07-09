@@ -37,9 +37,9 @@ Built on **LangGraph** for clean, typed state management across chunks — the l
 
 - 🎯 **Smart cutting** — keeps instructor teaching, cuts student mic time, logistics, breaks, and chatter
 - 🔁 **Repeat-aware** — if a student asks the instructor to repeat something, the *answer* is always kept
+- 💡 **Smart Prompt** — optimizing the user prompt on every chunk parsed
 - 🧵 **Sliding-window context** — chunks overlap so nothing gets lost at the edges
 - 📝 **Auto-generated summary** — a bullet-point recap of the whole lecture, for free
-- 🗑️ **QA video** — a second "discarded" video so you can sanity-check what got cut
 - 🎬 **Lossless cuts** — ffmpeg stream-copy, no re-encoding
 
 ## 🚀 Quick Start
