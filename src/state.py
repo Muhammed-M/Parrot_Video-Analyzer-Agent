@@ -15,5 +15,4 @@ class AgentState(TypedDict):
     # The final list of extracted timestamps (start_time, end_time, reason)
     extracted_segments: Annotated[List[Dict[str, Any]], operator.add]
 
-
-    instructor_name: str 
+    instructor_name: str

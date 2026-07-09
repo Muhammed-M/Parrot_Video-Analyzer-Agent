@@ -52,7 +52,13 @@ def extract_parrot_memory(state: AgentState) -> dict:
     
     # In LangGraph, returning a non-Annotated key overwrites it. 
     # This replaces the old topic with the newly optimized one!
-    return {
-        "main_topic": result.optimized_topic, 
+    update = {
+        "main_topic": result.optimized_topic,
         "global_summary": result.bullet_points
     }
+    
+    # Only set instructor_name if we don't already have one and this chunk found one
+    if not state.get("instructor_name") and result.instructor_name:
+        update["instructor_name"] = result.instructor_name
+    
+    return update

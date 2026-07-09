@@ -39,41 +39,7 @@ def merge_intervals(segments: list) -> list:
 
     return merged
 
-def get_video_duration(video_path: str) -> int:
-    """Uses ffprobe to get the total duration of the video in seconds."""
-    try:
-        result = subprocess.run(
-            ["ffprobe", "-v", "error", "-show_entries", "format=duration",
-             "-of", "default=noprint_wrappers=1:nokey=1", video_path],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-            check=True
-        )
-        return int(float(result.stdout.strip()))
-    except Exception as e:
-        print(f"⚠️ Could not get video duration via ffprobe. Error: {e}")
-        return None
 
-def invert_intervals(merged_intervals: list, total_duration: int) -> list:
-    """Calculates the 'negative space' gaps between the kept intervals."""
-    discarded = []
-    current_time = 0
-    
-    for start, end in merged_intervals:
-        if start > current_time:
-            # Only keep the gap if it's longer than 1 second
-            if (start - current_time) >= 1:
-                discarded.append([current_time, start])
-        # Move our tracker to the end of the kept clip
-        current_time = max(current_time, end)
-        
-    # Catch any remaining discarded footage at the end of the video
-    if total_duration and current_time < total_duration:
-         if (total_duration - current_time) >= 1:
-            discarded.append([current_time, total_duration])
-        
-    return discarded
 
 def render_clips(input_video_path: str, output_video_path: str, intervals: list, temp_folder: str):
     """Helper function that executes the FFmpeg cutting and concatenation."""
@@ -123,32 +89,16 @@ def render_clips(input_video_path: str, output_video_path: str, intervals: list,
     os.rmdir(temp_folder)
 
 def process_video(input_video_path: str, output_video_path: str, extracted_segments: list):
-    """Orchestrates creating both the KEPT and DISCARDED final videos."""
+    """Renders the final edited (KEPT) video from the extracted segments."""
     merged_intervals = merge_intervals(extracted_segments)
     
     if not merged_intervals:
         print("No valid segments to process.")
         return
 
-    print("\n🎥 Analyzing video duration to calculate discarded gaps...")
-    total_duration = get_video_duration(input_video_path)
-    
-    if not total_duration:
-        # Fallback if ffprobe fails: assume video ends right after the last kept clip
-        total_duration = merged_intervals[-1][1] 
-
-    discarded_intervals = invert_intervals(merged_intervals, total_duration)
 
     # 1. Render the main edited video (The Gold)
-    print(f"\n🎬 Rendering KEPT video ({len(merged_intervals)} clips) -> {output_video_path}")
+    print(f"\n🎬 Rendering Output video ({len(merged_intervals)} clips) -> {output_video_path}")
     render_clips(input_video_path, output_video_path, merged_intervals, "temp_kept")
-
-    # 2. Setup output name and render the garbage video (The QA Test)
-    dir_name, file_name = os.path.split(output_video_path)
-    name, ext = os.path.splitext(file_name)
-    discarded_output_path = os.path.join(dir_name, f"{name}_DISCARDED{ext}")
-
-    print(f"\n🗑️ Rendering DISCARDED video ({len(discarded_intervals)} clips) -> {discarded_output_path}")
-    render_clips(input_video_path, discarded_output_path, discarded_intervals, "temp_discarded")
     
-    print("\n✅ Both videos generated successfully!")
+    print("\n✅ Edited video generated successfully!")
