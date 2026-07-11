@@ -60,9 +60,6 @@ def extract_segments(state: AgentState) -> dict:
     prompt = ChatPromptTemplate.from_messages([
         ("system", """You are editing a raw lecture recording into a study video for a student who wants to fully understand the lecture while skipping only the parts that waste their time.
 
-            Evolving Main Topic: {topic}
-            Previously Discussed (Memory): {memory}
-
             Analyze the chunk and extract the start and end timestamps to KEEP.
          
             {speaker_note}
@@ -105,7 +102,10 @@ def extract_segments(state: AgentState) -> dict:
 
             Give the cuts a little bit of breathing room so the video doesn't feel like a glitchy mess. Do not
             make tiny 5-second cuts if it ruins the instructor's sentence, and never cut mid-sentence."""),
-        ("user", "Transcript Chunk with Timestamps:\n\n{chunk}")
+        ("user", """Evolving Main Topic: {topic}
+        Previously Discussed (Memory): {memory}
+        
+        Transcript Chunk with Timestamps: {chunk}""")
     ])
     
     chain = prompt | structured_llm
