@@ -33,15 +33,17 @@ def extract_parrot_memory(state: AgentState) -> dict:
     prompt = ChatPromptTemplate.from_messages([
         ("system", """You are an AI taking notes for a university lecture.
         
-        Current Working Topic: {topic}
-        
         TASK 1: Optimize the Topic. 
-        Based on what is being discussed in this chunk, expand or refine the 'Current Working Topic' so it becomes a more accurate, comprehensive title for the lecture.
+        Based on what is being discussed in the chunk, expand or refine the 'Current Working Topic' so it becomes a more accurate, comprehensive title for the lecture.
         
         TASK 2: Extract Bullet Points.
-        Extract 1 to 6 brief bullet points capturing the core educational facts taught in this chunk. 
+        Extract 1 to 6 brief bullet points capturing the core educational facts taught in the chunk. 
         Ignore student questions and casual chatter."""),
-        ("user", "Transcript Chunk:\n\n{chunk}")
+        
+        # Dynamic variables at the end
+        ("user", """Current Working Topic: {topic}, 
+        
+        Transcript Chunk: {chunk}""")
     ])
     
     chain = prompt | structured_llm
